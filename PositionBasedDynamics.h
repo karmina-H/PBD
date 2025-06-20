@@ -112,15 +112,8 @@ namespace PBD
 
 		// -------------- Shape Matching  -----------------------------------------------------
 
-		/** Initialize rest configuration infos for one shape matching cluster 
-		 * which are required by the solver step. It must only be reinitialized
-		 * if the rest shape changes. 
-		 *
-		 * @param  x0 rest configuration of all particles in the cluster
-		 * @param  invMasses inverse masses of all particles in the cluster
-		 * @param  numPoints number of particles in the cluster
-		 * @param  restCm returns the center of mass of the rest configuration
-		 */	
+		//점의 원래 초기상태(변형이 일어나기 전)를 초기화하는 함수 -> 나중에 변형 일어날때 초기상태를 기준으로 CONSTRAINT제약할텐데 불필요한 계산 방지위해서
+		//차례대로, 모든 particel좌표, 모든 particle질량의 역, 총 particle개수, particle이 이루는 클러스터의 질량중심 위치
 		static bool init_ShapeMatchingConstraint(
 			const Vector3r x0[], const Real invMasses[], const int numPoints,
 			Vector3r &restCm);
@@ -129,16 +122,18 @@ namespace PBD
 		 * More information can be found in: \cite BMM2015, \cite BMOT2013, \cite BMOTM2014, 
 		 * \cite Muller2005, \cite Bender2013, \cite Diziol2011
 		 *
-		 * @param  x0			rest configuration of all particles in the cluster
-		 * @param  x			current configuration of all particles in the cluster
-		 * @param  invMasses	invMasses inverse masses of all particles in the cluster
-		 * @param  numPoints	number of particles in the cluster
-		 * @param  restCm		center of mass of the rest configuration
-		 * @param  stiffness	stiffness coefficient 
+		 * @param  x0			정지 형태의 모든 점들의 위치를 저장한 배열(init으로 초기화한 원본 위치)
+		 * @param  x			모든 점들의 변형된 위치를 저장한 배열
+		 * @param  invMasses	각 점들의 질량의 역의 값
+		 * @param  numPoints	총 점의 개수
+		 * @param  restCm		정지 형태의 질량중심(init으로 초기화 한거)
+		 * @param  stiffness	강성계수
 		 * @param  allowStretch allow stretching
-		 * @param  corr			position corrections for all particles in the cluster
-		 * @param  rot			returns determined rotation matrix 
+		 * @param  corr			함수가 반환할 각 점들이 옮겨져야 할 위치보정값의 배열
+		 * @param  rot			함수가 계산해서 반환 할 회전행렬
 		 */	
+
+		//솔버 단계에서 각 시뮬레이션 스텝마다 호출되어, 물체가 원래의 '정지 형태'로 돌아가도록 강제하는 역할을 함
 		static bool solve_ShapeMatchingConstraint(
 			const Vector3r x0[], const Vector3r x[], const Real invMasses[], const int numPoints,
 			const Vector3r &restCm, 
